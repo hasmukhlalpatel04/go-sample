@@ -5,6 +5,23 @@ import (
 )
 
 func main() {
+
+	hc := HelpChecker{
+		HelpText: `Usage: myapp [options]
+Options:
+  -h, --help    Show this help message
+  -f <file>     Specify input file
+  -v            Enable verbose mode`,
+	}
+
+	if hc.CheckArgs() {
+		// Help was shown, exit or rerun logic
+		return
+	}
+
+	// Normal program execution continues here
+	fmt.Println("Running main program...")
+
 	fp := FileProcessor{FilePath: "example.txt"}
 
 	// Predicate: keep lines containing "Go"
