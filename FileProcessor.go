@@ -19,11 +19,32 @@ func (fp *FileProcessor) ReadAll() (string, error) {
 	return string(data), nil
 }
 
+// ReadAllLines reads the file line by line and returns a slice of strings.
+func (fp *FileProcessor) ReadAllLines() ([]string, error) {
+	file, err := os.Open(fp.FilePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return lines, nil
+}
+
 // Predicate is a function type that decides whether a line should be kept
 type Predicate func(string) bool
 
 // FindAll reads the file line by line and returns all lines
 // that satisfy the predicate.
+// FindAll with nil-safe predicate
 func (fp *FileProcessor) FindAll(predicate Predicate) ([]string, error) {
 	file, err := os.Open(fp.FilePath)
 	if err != nil {
@@ -35,7 +56,9 @@ func (fp *FileProcessor) FindAll(predicate Predicate) ([]string, error) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if predicate(line) {
+
+		// If predicate is nil, accept all lines
+		if predicate == nil || predicate(line) {
 			results = append(results, line)
 		}
 	}
