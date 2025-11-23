@@ -1,1 +1,1 @@
-# Go lan samples
+# Go lang samples
