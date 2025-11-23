@@ -11,6 +11,14 @@ type FileProcessor struct {
 	FilePath string
 }
 
+func (fp *FileProcessor) ReadAll() (string, error) {
+	data, err := os.ReadFile(fp.FilePath)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
 // Predicate is a function type that decides whether a line should be kept
 type Predicate func(string) bool
 

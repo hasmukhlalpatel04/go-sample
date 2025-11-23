@@ -24,6 +24,15 @@ Options:
 
 	fp := FileProcessor{FilePath: "example.txt"}
 
+	content, err := fp.ReadAll()
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+	fmt.Println("File content:")
+	fmt.Println(content)
+
 	// Predicate: keep lines containing "Go"
 	predicate := func(line string) bool {
 		return len(line) >= 2 && (line == "Go" || line == "golang" || line == "GO")
