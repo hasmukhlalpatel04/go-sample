@@ -2,10 +2,44 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
-// JsonSerializer provides static-style JSON serialization helpers.
-type JsonSerializer struct{}
+// JSONBox holds any generic value of type T.
+type JSONBox[T any] struct {
+	Value T
+}
+
+// Serialize method for JSONBox,
+// internally delegates to the static Serialize function.
+func (b JSONBox[T]) Serialize() ([]byte, error) {
+	return Serialize(b.Value)
+}
+
+// Deserialize method for JSONBox,
+// internally delegates to the static Deserialize function.
+func (b *JSONBox[T]) Deserialize(data []byte) error {
+	v, err := Deserialize[T](data)
+	if err != nil {
+		return err
+	}
+	b.Value = v
+	return nil
+}
+
+// Serialize behaves like a static method for any type T.
+func Serialize[T any](v T) ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// Deserialize behaves like a static method for any type T.
+func Deserialize[T any](data []byte) (T, error) {
+	var v T
+	if err := json.Unmarshal(data, &v); err != nil {
+		return v, fmt.Errorf("deserialize error: %w", err)
+	}
+	return v, nil
+}
 
 // DeserializeList deserializes JSON text into a slice of type T.
 func DeserializeList[T any](jsonText string) ([]T, error) {
@@ -18,59 +52,17 @@ func DeserializeList[T any](jsonText string) ([]T, error) {
 }
 
 // DeserializeSingle deserializes JSON text into a single object of type T.
-func Deserialize[T any](jsonText string) (T, error) {
+func DeserializeFromString[T any](jsonText string) (T, error) {
 	var result T
 	err := json.Unmarshal([]byte(jsonText), &result)
 	return result, err
 }
 
 // Serialize serializes any Go value into JSON text.
-func Serialize[T any](value T) (string, error) {
+func SerializeToString[T any](value T) (string, error) {
 	data, err := json.Marshal(value)
 	if err != nil {
 		return "", err
 	}
 	return string(data), nil
 }
-
-/* Usage example:
-// Example type
-type Person struct {
-    Name string `json:"name"`
-    Age  int    `json:"age"`
-}
-
-func main() {
-    serializer := JsonSerializer{}
-
-    // Example JSON array
-    jsonArray := `[{"name":"Alice","age":30},{"name":"Bob","age":25}]`
-
-    // Deserialize list
-    people, err := serializer.DeserializeList[Person](jsonArray)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return
-    }
-    fmt.Println("People list:", people)
-
-    // Example JSON object
-    jsonObject := `{"name":"Charlie","age":40}`
-
-    // Deserialize single
-    person, err := serializer.DeserializeSingle[Person](jsonObject)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return
-    }
-    fmt.Println("Single person:", person)
-
-    // Serialize back to JSON
-    jsonText, err := serializer.Serialize(person)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return
-    }
-    fmt.Println("Serialized JSON:", jsonText)
-}
-*/
