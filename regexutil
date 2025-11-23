@@ -1,0 +1,17 @@
+package main
+
+import (
+	"regexp"
+)
+
+// RegexSplit splits `text` wherever `pattern` matches.
+func RegexSplit(pattern, text string) []string {
+	re := regexp.MustCompile(pattern)
+	return re.Split(text, -1)
+}
+
+// RegexFind returns all substrings in `text` that match `pattern`.
+func RegexFind(pattern, text string) []string {
+	re := regexp.MustCompile(pattern)
+	return re.FindAllString(text, -1)
+}
